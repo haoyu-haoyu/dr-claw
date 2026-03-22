@@ -33,6 +33,13 @@ export interface SubagentChildTool {
   timestamp: Date;
 }
 
+export interface AttachedPrompt {
+  scenarioId: string;
+  scenarioIcon: string;
+  scenarioTitle: string;
+  promptText: string;
+}
+
 export interface ChatMessage {
   type: string;
   content?: string;
@@ -55,6 +62,7 @@ export interface ChatMessage {
     currentToolIndex: number;
     isComplete: boolean;
   };
+  attachedPrompt?: AttachedPrompt;
   [key: string]: unknown;
 }
 

@@ -179,6 +179,8 @@ function ChatInterface({
   const {
     input,
     setInput,
+    attachedPrompt,
+    setAttachedPrompt,
     textareaRef,
     inputHighlightRef,
     isTextareaExpanded,
@@ -677,6 +679,7 @@ function ChatInterface({
           setProvider={(nextProvider) => setProvider(nextProvider as Provider)}
           textareaRef={textareaRef}
           setInput={setInput}
+          setAttachedPrompt={setAttachedPrompt}
           claudeModel={claudeModel}
           setClaudeModel={setClaudeModel}
           cursorModel={cursorModel}
@@ -714,7 +717,7 @@ function ChatInterface({
         <div className="px-2 sm:px-4 max-w-5xl mx-auto w-full">
           <div className="flex gap-4">
             <div className="flex-1 min-w-0">
-              <SkillShortcutsPanel setInput={setInput} textareaRef={textareaRef} />
+              <SkillShortcutsPanel setInput={setInput} textareaRef={textareaRef} setAttachedPrompt={setAttachedPrompt} />
             </div>
             <div className="flex-1 min-w-0">
               <ChatTaskProgressPill
@@ -795,6 +798,11 @@ function ChatInterface({
           isTextareaExpanded={isTextareaExpanded}
           sendByCtrlEnter={sendByCtrlEnter}
           onTranscript={handleTranscript}
+          attachedPrompt={attachedPrompt}
+          onRemoveAttachedPrompt={() => setAttachedPrompt(null)}
+          onUpdateAttachedPrompt={(text) =>
+            setAttachedPrompt((prev) => prev ? { ...prev, promptText: text } : null)
+          }
         />
       </div>
 

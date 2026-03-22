@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import type { AttachedPrompt } from '../../types/types';
 
 interface SkillShortcutsPanelProps {
   setInput: React.Dispatch<React.SetStateAction<string>>;
   textareaRef: React.RefObject<HTMLTextAreaElement>;
+  setAttachedPrompt?: (prompt: AttachedPrompt | null) => void;
 }
 
 interface SkillCategory {
@@ -27,22 +29,43 @@ const CATEGORIES: SkillCategory[] = [
 export default function SkillShortcutsPanel({
   setInput,
   textareaRef,
+  setAttachedPrompt,
 }: SkillShortcutsPanelProps) {
   const { t } = useTranslation('chat');
   const [isCollapsed, setIsCollapsed] = useState(true);
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
 
-  const inject = (prompt: string) => {
-    setInput(prompt);
-    setTimeout(() => textareaRef.current?.focus(), 100);
+  const inject = (prompt: string, icon: string, title: string, categoryKey: string) => {
+    if (setAttachedPrompt) {
+      setAttachedPrompt({
+        scenarioId: `skill-${categoryKey}`,
+        scenarioIcon: icon,
+        scenarioTitle: title,
+        promptText: prompt,
+      });
+      setTimeout(() => textareaRef.current?.focus(), 100);
+    } else {
+      setInput(prompt);
+      setTimeout(() => textareaRef.current?.focus(), 100);
+    }
   };
 
-  const handleSkillClick = (skill: string) => {
-    inject(t('skillShortcuts.promptSingle', { skill }));
+  const handleSkillClick = (skill: string, category: SkillCategory) => {
+    inject(
+      t('skillShortcuts.promptSingle', { skill }),
+      category.icon,
+      t(`skillShortcuts.categories.${category.key}`),
+      category.key,
+    );
   };
 
   const handleUseAll = (category: SkillCategory) => {
-    inject(t('skillShortcuts.promptMulti', { skills: category.skills.join(', ') }));
+    inject(
+      t('skillShortcuts.promptMulti', { skills: category.skills.join(', ') }),
+      category.icon,
+      t(`skillShortcuts.categories.${category.key}`),
+      category.key,
+    );
   };
 
   return (
@@ -99,7 +122,7 @@ export default function SkillShortcutsPanel({
                 {cat.skills.map((skill) => (
                   <button
                     key={skill}
-                    onClick={() => handleSkillClick(skill)}
+                    onClick={() => handleSkillClick(skill, cat)}
                     className="px-3 py-1.5 text-xs font-medium rounded-full border border-border/50 bg-background hover:bg-muted hover:border-border transition-colors text-foreground"
                   >
                     {skill}
