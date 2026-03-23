@@ -282,6 +282,20 @@ function ChatInterface({
     onNavigateToSession,
   });
 
+  const chatMessagesRef = useRef(chatMessages);
+  chatMessagesRef.current = chatMessages;
+
+  const handleRetry = useCallback(() => {
+    const msgs = chatMessagesRef.current;
+    let lastUserMessage: (typeof msgs)[number] | undefined;
+    for (let i = msgs.length - 1; i >= 0; i--) {
+      if (msgs[i].type === 'user') { lastUserMessage = msgs[i]; break; }
+    }
+    if (lastUserMessage?.content) {
+      setInput(lastUserMessage.content);
+    }
+  }, [setInput, textareaRef]);
+
   const autoIntakeTriggeredRef = useRef(false);
   const lastAutoIntakeTriggerIdRef = useRef<string | null>(null);
   const [importedProjectAnalysisProvider, setImportedProjectAnalysisProvider] = React.useState<Provider>('claude');
@@ -713,6 +727,7 @@ function ChatInterface({
           providerAvailability={providerAvailability}
           newSessionMode={newSessionMode}
           onNewSessionModeChange={onNewSessionModeChange}
+          onRetry={handleRetry}
         />
 
         <div className="px-2 sm:px-4 max-w-5xl mx-auto w-full">

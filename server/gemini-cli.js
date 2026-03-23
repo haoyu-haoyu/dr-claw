@@ -670,9 +670,18 @@ export async function spawnGemini(command, options = {}, ws) {
         return;
       }
       lastSentGeminiErrorSummary = summary;
+
+      let errorType = 'unknown';
+      if (/usage[_ ]limit|rate[_ ]limit/i.test(summary)) errorType = 'usage_limit';
+      else if (/overloaded/i.test(summary)) errorType = 'overloaded';
+      else if (/network|ECONNREFUSED|ETIMEDOUT/i.test(summary)) errorType = 'network';
+      else if (/\bauth\b|unauthorized|forbidden/i.test(summary)) errorType = 'auth';
+
       ws.send({
         type: 'gemini-error',
         error: summary,
+        errorType,
+        isRetryable: errorType !== 'auth',
         ...(typeof details === 'string' && details.trim() ? { details } : {}),
         sessionId: capturedSessionId || sessionId || null
       });

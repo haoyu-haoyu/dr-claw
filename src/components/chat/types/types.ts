@@ -57,6 +57,8 @@ export interface ChatMessage {
     currentToolIndex: number;
     isComplete: boolean;
   };
+  errorType?: 'usage_limit' | 'overloaded' | 'network' | 'auth' | 'unknown';
+  isRetryable?: boolean;
   [key: string]: unknown;
 }
 

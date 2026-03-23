@@ -61,6 +61,7 @@ interface ChatMessagesPaneProps {
   providerAvailability: Record<SessionProvider, ProviderAvailability>;
   newSessionMode?: SessionMode;
   onNewSessionModeChange?: (mode: SessionMode) => void;
+  onRetry?: () => void;
 }
 
 export default function ChatMessagesPane({
@@ -108,6 +109,7 @@ export default function ChatMessagesPane({
   providerAvailability,
   newSessionMode = 'research',
   onNewSessionModeChange,
+  onRetry,
 }: ChatMessagesPaneProps) {
   const { t } = useTranslation('chat');
   const messageKeyMapRef = useRef<WeakMap<ChatMessage, string>>(new WeakMap());
@@ -310,6 +312,7 @@ export default function ChatMessagesPane({
                   showThinking={showThinking}
                   selectedProject={selectedProject}
                   provider={provider}
+                  onRetry={onRetry}
                 />
               );
             }
@@ -328,6 +331,7 @@ export default function ChatMessagesPane({
                 showThinking={showThinking}
                 selectedProject={selectedProject}
                 provider={provider}
+                onRetry={onRetry}
               />
             );
           })}

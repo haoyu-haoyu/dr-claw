@@ -655,15 +655,41 @@ async function queryClaudeSDK(command, options = {}, ws) {
   } catch (error) {
     console.error('SDK query error:', error);
 
+    // Record session before cleanup so it appears in sidebar even on early errors
+    if (capturedSessionId && !sessionId && !sessionCreatedSent && (options.cwd || options.projectPath)) {
+      sessionCreatedSent = true;
+      recordIndexedSession({
+        sessionId: capturedSessionId,
+        provider: 'claude',
+        projectPath: options.cwd || options.projectPath,
+        sessionMode: sessionMode || 'research',
+      });
+      ws.send({
+        type: 'session-created',
+        sessionId: capturedSessionId,
+        provider: 'claude',
+        mode: sessionMode || 'research',
+      });
+    }
+
     // Clean up session on error
     if (capturedSessionId) {
       removeSession(capturedSessionId);
     }
 
-    // Send error to WebSocket
+    const errorMsg = error.message || '';
+    let errorType = 'unknown';
+    if (/usage[_ ]limit|rate[_ ]limit/i.test(errorMsg)) errorType = 'usage_limit';
+    else if (/overloaded/i.test(errorMsg)) errorType = 'overloaded';
+    else if (/network|ECONNREFUSED|ETIMEDOUT/i.test(errorMsg)) errorType = 'network';
+    else if (/\bauth\b|unauthorized|forbidden/i.test(errorMsg)) errorType = 'auth';
+
+
     ws.send({
       type: 'claude-error',
       error: error.message,
+      errorType,
+      isRetryable: errorType !== 'auth',
       sessionId: capturedSessionId || sessionId || null
     });
 

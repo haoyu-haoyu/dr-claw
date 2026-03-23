@@ -424,9 +424,18 @@ export async function queryCodex(command, options = {}, ws) {
 
     if (!wasAborted) {
       console.error('[Codex] Error:', error);
+      const errorMsg = error.message || '';
+      let errorType = 'unknown';
+      if (/usage[_ ]limit|rate[_ ]limit/i.test(errorMsg)) errorType = 'usage_limit';
+      else if (/overloaded/i.test(errorMsg)) errorType = 'overloaded';
+      else if (/network|ECONNREFUSED|ETIMEDOUT/i.test(errorMsg)) errorType = 'network';
+      else if (/\bauth\b|unauthorized|forbidden/i.test(errorMsg)) errorType = 'auth';
+
       sendMessage(ws, {
         type: 'codex-error',
         error: error.message,
+        errorType,
+        isRetryable: errorType !== 'auth',
         sessionId: currentSessionId
       });
     }

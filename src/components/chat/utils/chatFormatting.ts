@@ -130,37 +130,7 @@ export function formatUsageLimitText(text: string) {
     // Strip <thinking>...</thinking> blocks that appear inline in assistant messages
     formattedText = formattedText.replace(/<thinking>[\s\S]*?<\/thinking>\s*/g, '');
 
-    return formattedText.replace(/Claude AI usage limit reached\|(\d{10,13})/g, (match, ts) => {
-      let timestampMs = parseInt(ts, 10);
-      if (!Number.isFinite(timestampMs)) return match;
-      if (timestampMs < 1e12) timestampMs *= 1000;
-      const reset = new Date(timestampMs);
-
-      const timeStr = new Intl.DateTimeFormat(undefined, {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false,
-      }).format(reset);
-
-      const offsetMinutesLocal = -reset.getTimezoneOffset();
-      const sign = offsetMinutesLocal >= 0 ? '+' : '-';
-      const abs = Math.abs(offsetMinutesLocal);
-      const offH = Math.floor(abs / 60);
-      const offM = abs % 60;
-      const gmt = `GMT${sign}${offH}${offM ? ':' + String(offM).padStart(2, '0') : ''}`;
-      const tzId = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
-      const cityRaw = tzId.split('/').pop() || '';
-      const city = cityRaw
-        .replace(/_/g, ' ')
-        .toLowerCase()
-        .replace(/\b\w/g, (char) => char.toUpperCase());
-      const tzHuman = city ? `${gmt} (${city})` : gmt;
-
-      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-      const dateReadable = `${reset.getDate()} ${months[reset.getMonth()]} ${reset.getFullYear()}`;
-
-      return `Claude usage limit reached. Your limit will reset at **${timeStr} ${tzHuman}** - ${dateReadable}`;
-    });
+    return formattedText.replace(/Claude AI usage limit reached\|\d{10,13}/g, 'AI usage limit reached. Please try again later.');    
   } catch {
     return text;
   }

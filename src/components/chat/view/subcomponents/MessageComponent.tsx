@@ -1,5 +1,5 @@
 import React, { memo, useMemo } from 'react';
-import { User } from 'lucide-react';
+import { User, RefreshCw } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import SessionProviderLogo from '../../../SessionProviderLogo';
 import type {
@@ -34,6 +34,7 @@ interface MessageComponentProps {
   hideThinkingFold?: boolean;
   selectedProject?: Project | null;
   provider: Provider | string;
+  onRetry?: () => void;
 }
 
 type InteractiveOption = {
@@ -63,7 +64,7 @@ function extractSkillContentTitle(content: string, fallback: string): string {
   return fallback;
 }
 
-const MessageComponent = memo(({ message, index, prevMessage, createDiff, onFileOpen, onShowSettings, onGrantToolPermission, autoExpandTools, showRawParameters, showThinking, hideThinkingFold, selectedProject, provider }: MessageComponentProps) => {
+const MessageComponent = memo(({ message, index, prevMessage, createDiff, onFileOpen, onShowSettings, onGrantToolPermission, autoExpandTools, showRawParameters, showThinking, hideThinkingFold, selectedProject, provider, onRetry }: MessageComponentProps) => {
   const { t } = useTranslation('chat');
   const isGrouped = prevMessage && prevMessage.type === message.type &&
                    ((prevMessage.type === 'assistant') ||
@@ -518,9 +519,27 @@ const MessageComponent = memo(({ message, index, prevMessage, createDiff, onFile
                     </div>
                   );
                 })()}
+
+                {message.type === 'error' && message.isRetryable && onRetry && (
+                  <div className="mt-3 flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => onRetry()}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 text-xs font-medium rounded-md border border-red-200/60 dark:border-red-800/40 hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors"
+                    >
+                      <RefreshCw className="w-3 h-3" />
+                      {t('error.retry')}
+                    </button>
+                    {message.errorType === 'usage_limit' && (
+                      <span className="text-xs text-red-500 dark:text-red-400">
+                        {t('error.usageLimitHint')}
+                      </span>
+                    )}
+                  </div>
+                )}
               </div>
             )}
-            
+
             {!isGrouped && (
               <div className="text-[10px] text-gray-400 dark:text-gray-500 mt-2">
                 {formattedTime}
