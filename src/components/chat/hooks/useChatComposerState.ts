@@ -544,6 +544,7 @@ export function useChatComposerState({
           await executeCommand(matchedCommand, trimmedInput);
           setInput('');
           inputValueRef.current = '';
+          setAttachedPrompt(null);
           setAttachedImages([]);
           setUploadingImages(new Map());
           setImageErrors(new Map());
